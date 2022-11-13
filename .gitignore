@@ -1,2 +1,6 @@
 venv/
-
+.flaskenv
+src/__pycache__
+__pycache__
+src/api/__pycache__
+.vscode
