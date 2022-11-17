@@ -28,8 +28,17 @@ class User(db.model):
 
 class SuperUser(db.model):
     __table__ = "super_users"
+
+    id = db.Column(db.Integer, autoincrement = True)    
+    # uid = db.Column(db.String(128), db.ForeignKey("users.uid"))
     
     email = db.Column(db.String(128), nullable = True)
     password = db.Column(db.String(128), nullable = True)
+    name = db.Column()
+
+    def __init__(self, email, password):
+        self.email = email
+        self.password = password
+
 
 

@@ -15,7 +15,7 @@ def create_app():
 
     api.init_app(app)
 
-    # db.init_app(app)
-    # migrate.init_app(app,db)
+    db.init_app(app)
+    migrate.init_app(app,db)
     # app.run(debug=True)
     return app
