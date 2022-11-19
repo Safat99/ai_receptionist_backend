@@ -5,7 +5,8 @@ from src.models import User, SuperUser
 from src.api import utils
 from src import bcrypt
 from src.api.user.crud import (
-    add_admin
+    add_admin,
+    add_user
 )
 
 user_namespace = Namespace('user')
@@ -22,6 +23,16 @@ register_admin = user_namespace.model(
         "email": fields.String(required=True),
         "password": fields.String(required=True),
         "name": fields.String(required=True),
+    },
+)
+register_user = user_namespace.model(
+    "register for user",
+    {
+        "userName": fields.String(required=True),
+        "role": fields.String(required=True),
+        "userImg": fields.String(required=True),
+        "userImg_mimetype": fields.String(required=True),
+        "userAudioLocation": fields.String(required=True),
     },
 )
 
@@ -75,5 +86,34 @@ class LoginSuperUser(Resource):
 
 
 
+class RegisterNewUser(Resource):
+    @user_namespace.expect(register_user)
+    def post(self):
+        """Register new user"""
+        resp = {}
+        payload = request.get_json()
+        userName = payload.get("userName")
+        role = payload.get("role")
+        userImg = payload.get("userImg")
+        userImg_mimetype = payload.get("userImg_mimetype")
+        userAudioLocation = payload.get("userAudioLocation")
+        uid = utils.unique_user_id(role=role)
+
+        if userName == None or role == None or userImg == None or userImg_mimetype == None or userAudioLocation == None:
+            resp["message"] = "Invalid payload given"
+            return resp, 400
+        user = User.query.filter_by(userName=userName).first()
+        if user:
+            resp["message"] = "This userName has already been used. Try with another"
+            return resp, 400
+        add_user(uid=uid, userName=userName, role=role, userImg=userImg, userImg_mimetype=userImg_mimetype, userAudioLocation= userAudioLocation)
+        
+        resp["userName"] = userName
+        resp["message"] = "User added, wait for verification"
+        resp["uid"] = str(uid)
+        return resp, 201
+
+
 user_namespace.add_resource(LoginSuperUser, "/loginAsSuperUser")
-user_namespace.add_resource(RegisterSuperUser, "/registerForSuperUser")
+user_namespace.add_resource(RegisterSuperUser, "/registerSuperUser")
+user_namespace.add_resource(RegisterNewUser, "/registerNewUser")

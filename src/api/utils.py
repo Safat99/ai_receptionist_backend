@@ -20,9 +20,11 @@ def unique_user_id(role):
     if (roles.get(role,"invalid_role") == 'invalid_role'):
         return 'error'
 
-    user = User.query.filter_by(uid=uid).first().uid
-    while user == uid:
-        uid = roles.get(role) + random_string(5)
+    uid = roles.get(role) + random_string(5)
+    user = User.query.filter_by(uid=uid).first()
+    if user:
+        while user.uid == uid:
+            uid = roles.get(role) + random_string(5)
     return uid
 
     
