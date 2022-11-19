@@ -31,15 +31,15 @@ class SuperUser(db.Model):
     __tablename__ = "super_users"
 
     id = db.Column(db.Integer, primary_key = True, autoincrement = True)    
-    # uid = db.Column(db.String(128), db.ForeignKey("users.uid"))
-    
+    # uid = db.Column(db.String(128), db.ForeignKey("users.uid"))    
     email = db.Column(db.String(128), nullable = False)
     password = db.Column(db.String(128), nullable = False)
     name = db.Column(db.String(128), nullable = False)
 
-    def __init__(self, email, password):
+    def __init__(self, email, password, name):
         self.email = email
-        # self.password = bcrypt.generate_password_hash(password=password, current_app.config.get("BCRYPT_LOG_ROUNDS")).decode()
+        self.name = name
+        self.password = bcrypt.generate_password_hash(password, current_app.config.get("BCRYPT_LOG_ROUNDS")).decode()
     
     def encode_token(self, user_id, token_type):
         if token_type == "access_token":
