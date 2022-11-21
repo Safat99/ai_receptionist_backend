@@ -1,5 +1,6 @@
 venv/
 .flaskenv
+.env
 src/__pycache__
 __pycache__
 src/api/__pycache__

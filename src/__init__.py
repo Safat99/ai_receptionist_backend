@@ -3,6 +3,9 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
+from dotenv import load_dotenv
+load_dotenv()
+
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -23,3 +26,6 @@ def create_app():
 
     # app.run(debug=True)
     return app
+
+if __name__=='__main__':
+    create_app.run(debug=True)
