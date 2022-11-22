@@ -108,7 +108,7 @@ class RegisterNewUser(Resource):
         add_user(uid=uid, userName=userName, role=role, userImg=userImg, userImg_mimetype=userImg_mimetype, userAudioLocation= userAudioLocation)
         
         resp["userName"] = userName
-        resp["message"] = "User added, wait for verification"
+        resp["message"] = "User added"
         resp["uid"] = str(uid)
         return resp, 201
 

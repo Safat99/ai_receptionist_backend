@@ -11,7 +11,7 @@ class User(db.Model):
     uid = db.Column(db.String(128), primary_key = True, unique = True, nullable = False)
     userName = db.Column(db.String(128), nullable = False)
     role = db.Column(db.String(32), nullable = False)
-    isVerified = db.Column(db.Boolean(), default = False, nullable = False)
+    isVerified = db.Column(db.Boolean(), default = True, nullable = False)
     userImg = db.Column(db.Text, nullable = False)
     userImg_mimetype = db.Column(db.Text, nullable = False) #media type
     userAudioLocation = db.Column(db.Text, nullable=False)
