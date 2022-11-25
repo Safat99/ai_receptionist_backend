@@ -15,7 +15,7 @@ class User(db.Model):
     userImg = db.Column(db.Text, nullable = False)
     userImg_mimetype = db.Column(db.Text, nullable = False) #media type
     userAudioLocation = db.Column(db.Text, nullable=False)
-    registeredDate = db.Column(db.DateTime,default=func.now() ,nullable=False)
+    registeredDate = db.Column(db.DateTime,default=func.now(), nullable=False)
 
     def __init__(self, uid, userName, role, userImg, userImg_mimetype, userAudioLocation):
         self.uid = uid

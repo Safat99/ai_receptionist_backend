@@ -6,3 +6,4 @@ __pycache__
 src/api/__pycache__
 .vscode
 important_notes.txt
+data/

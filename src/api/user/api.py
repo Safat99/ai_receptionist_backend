@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, flash, redirect
 from flask_restx import Resource, Namespace, fields
 from src.models import User, SuperUser
 from src.api import utils
@@ -7,6 +7,7 @@ from src.api.user.crud import (
     add_admin,
     add_user
 )
+from src.api.utils import save_photo
 
 user_namespace = Namespace('user')
 login_admin = user_namespace.model(
@@ -113,6 +114,28 @@ class RegisterNewUser(Resource):
         return resp, 201
 
 
+class UploadImage(Resource):
+    def post(self):
+        # check if the post request has the file part
+        resp = {}
+        if 'file' not in request.files:
+            flash('No file part')
+            resp["message"] = "No file part"
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash("No selected file")
+            resp["message"] = "No selected file"
+            return redirect(request.url)
+        save_photo(file)
+        resp["message"] = "done"
+        return resp, 200
+
+        
+
 user_namespace.add_resource(LoginSuperUser, "/loginAsSuperUser")
 user_namespace.add_resource(RegisterSuperUser, "/registerSuperUser")
 user_namespace.add_resource(RegisterNewUser, "/registerNewUser")
+user_namespace.add_resource(UploadImage, "/upload_image")
