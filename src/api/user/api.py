@@ -1,4 +1,4 @@
-from flask import request, flash, redirect
+from flask import request, flash
 from flask_restx import Resource, Namespace, fields
 from src.models import User, SuperUser
 from src.api import utils
@@ -35,6 +35,12 @@ register_user = user_namespace.model(
         "userAudioLocation": fields.String(required=True),
     },
 )
+# upload_image = user_namespace.model(
+#     "upload image"
+#     {
+#         "file" : fields
+#     }
+# )
 
 
 class RegisterSuperUser(Resource):
@@ -121,14 +127,14 @@ class UploadImage(Resource):
         if 'file' not in request.files:
             flash('No file part')
             resp["message"] = "No file part"
-            return redirect(request.url)
+            return resp, 400
         file = request.files['file']
         # if user does not select file, browser also
         # submit a empty part without filename
         if file.filename == '':
             flash("No selected file")
             resp["message"] = "No selected file"
-            return redirect(request.url)
+            return resp, 400
         save_photo(file)
         resp["message"] = "done"
         return resp, 200
