@@ -35,6 +35,8 @@ def save_photo(file):
     if file and allowed_file(file.filename):
         filename = file.filename
         file.save(os.path.join(current_app.config.get("UPLOAD_FOLDER"), filename))
+        mediatype = filename.rsplit('.',1)[1].lower()
+        return filename, mediatype
 
 
     

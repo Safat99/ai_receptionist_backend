@@ -1,13 +1,16 @@
 from flask import request, flash
 from flask_restx import Resource, Namespace, fields
-from src.models import User, SuperUser
+from src.models import User, SuperUser, UserImage
 from src.api import utils
 from src import bcrypt
 from src.api.user.crud import (
     add_admin,
-    add_user
+    add_user,
+    add_userImage
 )
 from src.api.utils import save_photo
+from src.fr_module import face_recognition_module
+
 
 user_namespace = Namespace('user')
 login_admin = user_namespace.model(
@@ -92,7 +95,7 @@ class LoginSuperUser(Resource):
 
 
 
-class RegisterNewUser(Resource):
+class RegisterNewUserBasic(Resource):
     @user_namespace.expect(register_user)
     def post(self):
         """Register new user"""
@@ -119,6 +122,40 @@ class RegisterNewUser(Resource):
         resp["uid"] = str(uid)
         return resp, 201
 
+class RegisterNewUserImage(Resource):
+    def post(self):
+        """add user image"""
+        resp = {}
+        uid = request.form['uid']
+        try:
+            users_image_obj = User.query.filter_by(uid=uid).first()
+            userName = users_image_obj.userName
+        except:
+            users_image_obj = None
+            resp["message"] = "no user found against this uid"
+            return resp, 405
+        
+        if 'file' not in request.files:
+            flash('No file part')
+            resp["message"] = "No file part"
+            return resp, 405
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash("No selected file")
+            resp["message"] = "No selected file"
+            return resp, 405
+        filename, mediatype = save_photo(file)
+        face_encoding = face_recognition_module.register_face(image_file_path=('data/images/' + filename), user_id=uid, name=userName)
+        if type(face_encoding) != list:
+            resp["message"] = "cannot encode image file properly!! returned with {}".format(face_encoding)
+            return resp, 405
+        add_userImage(uid=uid, filename=filename, mediatype=mediatype, face_encoding=str(face_encoding))
+        resp["message"] = "saved in json and db succesfully"
+        return resp, 200
+        
+    
 
 class UploadImage(Resource):
     def post(self):
@@ -127,21 +164,24 @@ class UploadImage(Resource):
         if 'file' not in request.files:
             flash('No file part')
             resp["message"] = "No file part"
-            return resp, 400
+            return resp, 405
         file = request.files['file']
         # if user does not select file, browser also
         # submit a empty part without filename
         if file.filename == '':
             flash("No selected file")
             resp["message"] = "No selected file"
-            return resp, 400
-        save_photo(file)
-        resp["message"] = "done"
+            return resp, 405
+        filename, mediatype = save_photo(file)
+        resp["message"] = "pic uploaded and saved successfully with name:{}".format(filename)
+        resp["filename"] = filename
+        resp["mediatype"] = mediatype
         return resp, 200
 
         
 
 user_namespace.add_resource(LoginSuperUser, "/loginAsSuperUser")
 user_namespace.add_resource(RegisterSuperUser, "/registerSuperUser")
-user_namespace.add_resource(RegisterNewUser, "/registerNewUser")
+user_namespace.add_resource(RegisterNewUserBasic, "/registerNewUser")
 user_namespace.add_resource(UploadImage, "/upload_image")
+user_namespace.add_resource(RegisterNewUserImage, "/registerNewUserImage")

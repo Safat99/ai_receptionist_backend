@@ -4,7 +4,7 @@ import json
 import os
 
 class FR:
-    face_encoding_filename = "face_data/fr_face_encodings.json"
+    face_encoding_filename = "data/face_data/fr_face_encodings.json"
 
     def resize_image(self,path):
         img = cv2.imread(path)
@@ -19,11 +19,12 @@ class FR:
         # image file to encodings generations
         # face entry
         # image = cv2.imread(image_file_path)
-        image = self.resize_image(image_file_path)
+        # print(image_file_path)
+        image = self.resize_image(path=image_file_path)
         image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
         face_bounderies = face_recognition.face_locations(image)
         
-        if len(face_encoding)!=1:
+        if len(face_bounderies)!=1:
             return -99
         
         try:
@@ -55,4 +56,4 @@ class FR:
 
             json.dump(file_data,file, indent=4)
 
-        return face_encoding
+        return face_encoding.tolist()

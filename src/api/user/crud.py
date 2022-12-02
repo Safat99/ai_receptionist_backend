@@ -1,5 +1,5 @@
 from src import db
-from src.models import SuperUser, User
+from src.models import SuperUser, User, UserImage
 
 def add_admin(**kwargs):
     """this api will be removed later"""
@@ -24,4 +24,13 @@ def add_user(**kwargs):
     db.session.add(user)
     db.session.commit()
 
-
+def add_userImage(**kwargs):
+    """add newUsers image to the userImage table"""
+    image_file = UserImage(
+        uid = kwargs["uid"],
+        userImg = kwargs["filename"],
+        userImg_mimetype = kwargs["mediatype"],
+        userImg_encoded_value = kwargs["face_encoding"]
+    )
+    db.session.add(image_file)
+    db.session.commit()
