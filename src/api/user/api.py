@@ -30,9 +30,9 @@ register_user = user_namespace.model(
     {
         "userName": fields.String(required=True),
         "role": fields.String(required=True),
-        "userImg": fields.String(required=True),
-        "userImg_mimetype": fields.String(required=True),
-        "userAudioLocation": fields.String(required=True),
+        # "userImg": fields.String(required=True),
+        # "userImg_mimetype": fields.String(required=True),
+        # "userAudioLocation": fields.String(required=True),
     },
 )
 # upload_image = user_namespace.model(
@@ -100,19 +100,19 @@ class RegisterNewUser(Resource):
         payload = request.get_json()
         userName = payload.get("userName")
         role = payload.get("role")
-        userImg = payload.get("userImg")
-        userImg_mimetype = payload.get("userImg_mimetype")
-        userAudioLocation = payload.get("userAudioLocation")
+        # userImg = payload.get("userImg")
+        # userImg_mimetype = payload.get("userImg_mimetype")
+        # userAudioLocation = payload.get("userAudioLocation")
         uid = utils.unique_user_id(role=role)
 
-        if userName == None or role == None or userImg == None or userImg_mimetype == None or userAudioLocation == None:
+        if userName == None or role == None:
             resp["message"] = "Invalid payload given"
             return resp, 400
         user = User.query.filter_by(userName=userName).first()
         if user:
             resp["message"] = "This userName has already been used. Try with another"
             return resp, 400
-        add_user(uid=uid, userName=userName, role=role, userImg=userImg, userImg_mimetype=userImg_mimetype, userAudioLocation= userAudioLocation)
+        add_user(uid=uid, userName=userName, role=role)
         
         resp["userName"] = userName
         resp["message"] = "User added"

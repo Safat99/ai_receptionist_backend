@@ -17,9 +17,9 @@ def add_user(**kwargs):
         uid = kwargs["uid"],
         userName=kwargs["userName"],
         role = kwargs["role"],
-        userImg=kwargs["userImg"],
-        userImg_mimetype=kwargs["userImg_mimetype"],
-        userAudioLocation=kwargs["userAudioLocation"]
+        # userImg=kwargs["userImg"],
+        # userImg_mimetype=kwargs["userImg_mimetype"],
+        # userAudioLocation=kwargs["userAudioLocation"]
     )
     db.session.add(user)
     db.session.commit()

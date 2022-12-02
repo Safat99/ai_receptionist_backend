@@ -12,19 +12,29 @@ class User(db.Model):
     userName = db.Column(db.String(128), nullable = False)
     role = db.Column(db.String(32), nullable = False)
     isVerified = db.Column(db.Boolean(), default = True, nullable = False)
-    userImg = db.Column(db.Text, nullable = False)
-    userImg_mimetype = db.Column(db.Text, nullable = False) #media type
-    userAudioLocation = db.Column(db.Text, nullable=False)
+    # userAudioLocation = db.Column(db.Text, nullable=True)
     registeredDate = db.Column(db.DateTime,default=func.now(), nullable=False)
 
-    def __init__(self, uid, userName, role, userImg, userImg_mimetype, userAudioLocation):
+    def __init__(self, uid, userName, role):
         self.uid = uid
         self.userName = userName
         self.role = role
+        # self.userAudioLocation = userAudioLocation
+
+class UserImage(db.Model):
+    __tablename__ = "users_image"
+
+    id = db.Column(db.Integer, nullable = False, primary_key = True, unique = True, autoincrement = True)
+    uid = db.Column(db.String(128), db.ForeignKey("users.uid"), nullable = True)
+    userImg = db.Column(db.Text, nullable = True) ## this will be a folder location
+    userImg_mimetype = db.Column(db.String(128), nullable = True) #media type
+    userImg_encoded_value = db.Column(db.Text, nullable=True) ## the pythonic list
+
+    def ___init__(self, uid, userImg, userImg_mimetype, userImg_encoded_value):
+        self.uid = uid
         self.userImg = userImg
         self.userImg_mimetype = userImg_mimetype
-        self.userAudioLocation = userAudioLocation
-
+        self.userImg_encoded_value = userImg_encoded_value
 
 
 class SuperUser(db.Model):
@@ -60,6 +70,3 @@ class SuperUser(db.Model):
             return sub
         except:
             return "expired"
-
-
-
