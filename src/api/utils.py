@@ -38,6 +38,10 @@ def save_photo(file):
         mediatype = filename.rsplit('.',1)[1].lower()
         return filename, mediatype
 
+def save_audio(file):
+    filename = file.filename
+    file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
+    return filename
 
     
 

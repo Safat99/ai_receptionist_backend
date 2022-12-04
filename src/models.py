@@ -36,6 +36,18 @@ class UserImage(db.Model):
         self.userImg_mimetype = userImg_mimetype
         self.userImg_encoded_value = userImg_encoded_value
 
+class UserAudio(db.Model):
+    __tablename__ = "users_audio"
+
+    id = db.Column(db.Integer, nullable = False, primary_key = True, unique = True, autoincrement = True)
+    uid = db.Column(db.String(128), db.ForeignKey("users.uid"), nullable = True)
+    userAudioPath = db.Column(db.Text, nullable = True) ## this will be a folder location
+    userAudioGMMPath = db.Column(db.Text, nullable = True) ## this will be the model file location of the audio
+
+    def ___init__(self, uid, userAudioPath,userAudioGMMPath):
+        self.uid = uid
+        self.userAudioPath = userAudioPath
+        userAudioGMMPath = userAudioGMMPath
 
 class SuperUser(db.Model):
     __tablename__ = "super_users"

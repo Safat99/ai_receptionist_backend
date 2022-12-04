@@ -1,15 +1,17 @@
 from flask import request, flash
 from flask_restx import Resource, Namespace, fields
-from src.models import User, SuperUser, UserImage
+from src.models import User, SuperUser
 from src.api import utils
 from src import bcrypt
 from src.api.user.crud import (
     add_admin,
     add_user,
-    add_userImage
+    add_userImage,
+    add_userAudio
 )
-from src.api.utils import save_photo
+from src.api.utils import save_photo, save_audio
 from src.fr_module import face_recognition_module
+from src.speech_recognition_module import speaker_recognition_module
 
 
 user_namespace = Namespace('user')
@@ -155,7 +157,42 @@ class RegisterNewUserImage(Resource):
         resp["message"] = "saved in json and db succesfully"
         return resp, 200
         
-    
+class RegisterNewUserAudio(Resource):
+    def post(self):
+        """upload audio for registration"""
+        resp = {}
+        uid = request.form['uid']
+        try:
+            users_image_obj = User.query.filter_by(uid=uid).first()
+            userName = users_image_obj.userName
+        except:
+            users_image_obj = None
+            resp["message"] = "no user found against this uid"
+            return resp, 405
+        
+        if 'file' not in request.files:
+            resp["message"] = "No file part"
+            return resp, 405
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        filename = file.filename
+        if filename == '':
+            resp["message"] = "No selected file"
+            return resp, 405
+        ## the model can only work with .wav file
+        elif filename.rsplit('.',1)[1] != 'wav':
+            resp["message"] = "only .wav files are allowed"
+            return resp, 405
+
+        filename = save_audio(file=file)
+        speaker_model_path = speaker_recognition_module.register_speaker('data/audios/'+ filename, user_id = userName)
+        if speaker_model_path == -1:
+            resp["message"] = "speaker register operation failed"
+            return resp, 405
+        add_userAudio(uid=uid, userAudioPath='data/audios/'+filename, userAudioGMMPath=speaker_model_path)
+        resp["message"] = "saved in .gmm and location in db succesfully"
+        return resp, 200
 
 class UploadImage(Resource):
     def post(self):
@@ -185,3 +222,4 @@ user_namespace.add_resource(RegisterSuperUser, "/registerSuperUser")
 user_namespace.add_resource(RegisterNewUserBasic, "/registerNewUser")
 user_namespace.add_resource(UploadImage, "/upload_image")
 user_namespace.add_resource(RegisterNewUserImage, "/registerNewUserImage")
+user_namespace.add_resource(RegisterNewUserAudio, "/registerNewUserAudio")

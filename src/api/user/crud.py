@@ -1,5 +1,5 @@
 from src import db
-from src.models import SuperUser, User, UserImage
+from src.models import SuperUser, User, UserImage, UserAudio
 
 def add_admin(**kwargs):
     """this api will be removed later"""
@@ -33,4 +33,15 @@ def add_userImage(**kwargs):
         userImg_encoded_value = kwargs["face_encoding"]
     )
     db.session.add(image_file)
+    db.session.commit()
+
+
+def add_userAudio(uid, userAudioPath,userAudioGMMPath):
+    """add newUsers Audio file to the UserAudio table"""
+    audio_obj = UserAudio(
+        uid = uid,
+        userAudioPath = userAudioPath
+        userAudioGMMPath = userAudioGMMPath
+    )
+    db.session.add(audio_obj)
     db.session.commit()

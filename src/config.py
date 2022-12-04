@@ -12,3 +12,4 @@ class LocalConfig:
     ACCESS_TOKEN_EXPIRATION = 3600
     REFRESH_TOKEN_EXPIRATION = 2592000
     UPLOAD_FOLDER = 'data/images/'
+    UPLOAD_AUDIO_FOLDER = 'data/audios/'
