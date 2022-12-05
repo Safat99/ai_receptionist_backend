@@ -43,6 +43,10 @@ def save_audio(file):
     file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
     return filename
 
+def save_temp_audio(file,filename):
+    file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
+    
+
     
 
 

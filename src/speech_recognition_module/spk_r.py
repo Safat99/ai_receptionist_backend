@@ -43,7 +43,7 @@ class Spk_r:
         #raise error
         if os.path.isdir(Spk_r.model_path_dir) == False:
             #add error code according to your use
-            return -1
+            return -1, -100
         
         # to extract necessary features from the audio 
         feature_extractor = ExtractFeature()
@@ -58,14 +58,15 @@ class Spk_r:
 
         
         # user ids of all the users in the database
-        user_ids = [int(fname.split("/")[-1].split(".gmm")[0]) for fname in gmm_files]
+        # user_ids = [int(fname.split("/")[-1].split(".gmm")[0]) for fname in gmm_files]
+        user_names = [int(fname.split("/")[-1].split(".gmm")[0]) for fname in gmm_files]
 
         #list of existing models
         existing_speaker_models   = [pickle.load(open(gmm_file,'rb')) for gmm_file in gmm_files] # rb stands for  reading the binary file
         
         #if this triggers, it means that there are no user models in the database
         if len(existing_speaker_models) == 0:
-            return -100
+            return -1, -100
 
 
         # speaker recognition part
@@ -82,10 +83,12 @@ class Spk_r:
         winner = np.argmax(score_of_individual_comparision)
 
         #detected
-        detected_user_id = user_ids[winner]
+        # detected_user_id = user_ids[winner]
+        detected_user_name = user_names[winner]
 
         
-        return detected_user_id, score_of_individual_comparision.max()
+        # return detected_user_id, score_of_individual_comparision.max()
+        return detected_user_name, score_of_individual_comparision.max()
 
         # print(gmm_files)
         # print(user_ids)

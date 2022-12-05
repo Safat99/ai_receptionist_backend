@@ -1,6 +1,6 @@
 from flask import request, flash
 from flask_restx import Resource, Namespace, fields
-from src.models import User, SuperUser
+from src.models import User, SuperUser, UserAudio
 from src.api import utils
 from src import bcrypt
 from src.api.user.crud import (
@@ -9,7 +9,7 @@ from src.api.user.crud import (
     add_userImage,
     add_userAudio
 )
-from src.api.utils import save_photo, save_audio
+from src.api.utils import save_photo, save_audio, save_temp_audio
 from src.fr_module import face_recognition_module
 from src.speech_recognition_module import speaker_recognition_module
 
@@ -194,6 +194,46 @@ class RegisterNewUserAudio(Resource):
         resp["message"] = "saved in .gmm and location in db succesfully"
         return resp, 200
 
+class RecognizeWithAudio(Resource):
+    def post(self):
+        """the audio login api"""
+        resp = {}
+        if 'file' not in request.files:
+            resp["message"] = "No file part"
+            return resp, 405
+        file = request.files['file']
+        if file.filename == '':
+            resp["message"] = "No selected file"
+            return resp, 405
+        ## the model can only work with .wav file
+        elif file.filename.rsplit('.',1)[1] != 'wav':
+            resp["message"] = "only .wav files are allowed"
+            return resp, 405
+        save_temp_audio(file=file, filename='test_temp_audio.wav')
+        ## manually searching from the audio files and recognize
+        detected_user_name, score = speaker_recognition_module.recognize_speaker(audio_path='data/audios/test_temp_audio.wav')
+        if detected_user_name == -1:
+            resp["message"] = "fails to recognize any audios"
+            return resp, 405
+        user = User.query.filter_by(userName=detected_user_name).first()
+        if user == None:
+            resp["message"] = "audio detected but cannot find any relavant user in DB"
+            return resp, 405
+        else:
+            uid = user.uid
+        userAudio = UserAudio.query.filter_by(uid=uid).first()
+        if userAudio == None:
+            resp["message"] = "userAudio table data missing"
+            return resp, 405
+        else:
+            userAudioPath = userAudio.userAudioPath
+        
+        resp["message"] = "successfully Detected USER for log in"
+        resp["uid"] = uid
+        resp["userAudioPath"] = userAudioPath
+        return resp, 200
+
+
 class UploadImage(Resource):
     def post(self):
         # check if the post request has the file part
@@ -214,7 +254,6 @@ class UploadImage(Resource):
         resp["filename"] = filename
         resp["mediatype"] = mediatype
         return resp, 200
-
         
 
 user_namespace.add_resource(LoginSuperUser, "/loginAsSuperUser")
@@ -223,3 +262,5 @@ user_namespace.add_resource(RegisterNewUserBasic, "/registerNewUser")
 user_namespace.add_resource(UploadImage, "/upload_image")
 user_namespace.add_resource(RegisterNewUserImage, "/registerNewUserImage")
 user_namespace.add_resource(RegisterNewUserAudio, "/registerNewUserAudio")
+user_namespace.add_resource(RecognizeWithAudio, "/recognizeWithAudio")
+# user_namespace.add_resource(LoginWithPicture,"/loginWithPicture")
