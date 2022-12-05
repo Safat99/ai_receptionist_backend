@@ -9,7 +9,7 @@ from src.api.user.crud import (
     add_userImage,
     add_userAudio
 )
-from src.api.utils import save_photo, save_audio, save_temp_audio
+from src.api.utils import save_photo, save_audio, save_temp_audio, save_temp_photo
 from src.fr_module import face_recognition_module
 from src.speech_recognition_module import speaker_recognition_module
 
@@ -157,6 +157,38 @@ class RegisterNewUserImage(Resource):
         resp["message"] = "saved in json and db succesfully"
         return resp, 200
         
+class RecognizeWithImage(Resource):
+    def post(self):
+        """upload image for recognize"""
+        resp = {}
+        
+        if 'file' not in request.files:
+            resp["message"] = "No file part"
+            return resp, 405
+        file = request.files['file']
+        if file.filename == '':
+            resp["message"] = "No selected file"
+            return resp, 405
+        
+        filename, mediatype = save_temp_photo(file=file, filename=file.filename)
+        result = face_recognition_module.recognize_face(image_file_path="data/images/" + filename)
+        if type(result) == int:
+            resp["message"] = "cannot encode image, please capture again"
+            return resp, 405
+        # elif type(result) == str:
+        else: 
+            if result[0] == 'U':
+                resp["message"] = "Unknown user"
+                return resp, 405
+            else:
+                person_uid = result
+                person_name = User.query.filter_by(uid=person_uid).first().userName
+        resp["message"] = "User {} found succesfully!!! Ready for login".format(person_name)
+        resp["userName"] = person_name
+        resp["uid"] = person_uid
+        return resp, 200
+
+
 class RegisterNewUserAudio(Resource):
     def post(self):
         """upload audio for registration"""
@@ -263,4 +295,4 @@ user_namespace.add_resource(UploadImage, "/upload_image")
 user_namespace.add_resource(RegisterNewUserImage, "/registerNewUserImage")
 user_namespace.add_resource(RegisterNewUserAudio, "/registerNewUserAudio")
 user_namespace.add_resource(RecognizeWithAudio, "/recognizeWithAudio")
-# user_namespace.add_resource(LoginWithPicture,"/loginWithPicture")
+user_namespace.add_resource(RecognizeWithImage,"/RecognizeWithImage")

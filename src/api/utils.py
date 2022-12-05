@@ -28,7 +28,7 @@ def unique_user_id(role):
             uid = roles.get(role) + random_string(5)
     return uid
 
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 def save_photo(file):
@@ -46,7 +46,13 @@ def save_audio(file):
 def save_temp_audio(file,filename):
     file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
     
-
+def save_temp_photo(file,filename):
+    if file and allowed_file(filename):
+        file_extension = filename.rsplit('.', 1)[1]
+        filename = 'test_temp_photo' + file_extension
+        file.save(os.path.join(current_app.config.get("UPLOAD_FOLDER"), filename))
+        mediatype = file_extension.lower()
+        return filename, mediatype
     
 
 
