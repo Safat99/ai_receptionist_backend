@@ -40,7 +40,7 @@ def add_userAudio(uid, userAudioPath,userAudioGMMPath):
     """add newUsers Audio file to the UserAudio table"""
     audio_obj = UserAudio(
         uid = uid,
-        userAudioPath = userAudioPath
+        userAudioPath = userAudioPath,
         userAudioGMMPath = userAudioGMMPath
     )
     db.session.add(audio_obj)

@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import os
 
-from speech_recognition_module.ExtractFeature import ExtractFeature
+from src.speech_recognition_module.ExtractFeature import ExtractFeature
 import pickle
 from sklearn.mixture import GaussianMixture
 
