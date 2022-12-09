@@ -62,8 +62,8 @@ class SuperUser(db.Model):
         self.email = email
         self.name = name
         self.password = bcrypt.generate_password_hash(password, current_app.config.get("BCRYPT_LOG_ROUNDS")).decode()
-    
-    def encode_token(self, user_id, token_type):
+    @staticmethod
+    def encode_token(user_id, token_type):
         if token_type == "access_token":
             expire = current_app.config.get("ACCESS_TOKEN_EXPIRATION")
         elif token_type == "refresh_token":
@@ -74,7 +74,7 @@ class SuperUser(db.Model):
             "sub": user_id
         }
         return jwt.encode(payload, key=current_app.config.get("SECRET_KEY"), algorithm="HS256")
-
+    @staticmethod
     def decode_token(token):
         try:
             decoded = jwt.decode(token, key=current_app.config.get("SECRET_KEY"), algorithms="HS256")
