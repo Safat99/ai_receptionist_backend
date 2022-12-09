@@ -21,8 +21,7 @@ COPY migrations migrations
 COPY manage.py boot.sh ./
 RUN chmod a+x /home/safat/boot.sh
 
-ENV FLASK_APP manage.py
-# ENV DATABASE_URL 
+ENV FLASK_APP manage.py 
 
 RUN chown -R safat:safat ./
 USER safat
