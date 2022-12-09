@@ -7,7 +7,8 @@ import jwt
 class User(db.Model):
     __tablename__ = "users"
     
-    id = db.Column(db.Integer, nullable = False, unique = True, autoincrement = True)
+    id = db.Column(db.Integer, nullable = False, unique = True, autoincrement = True) ##this will need to be manually done in the db level
+    # sqlalchemy probably does not allow auto increment feature in the non primary key
     uid = db.Column(db.String(128), primary_key = True, unique = True, nullable = False)
     userName = db.Column(db.String(128), nullable = False)
     role = db.Column(db.String(32), nullable = False)
