@@ -183,9 +183,15 @@ class RecognizeWithImage(Resource):
             else:
                 person_uid = result
                 person_name = User.query.filter_by(uid=person_uid).first().userName
+        
+        access_token = SuperUser.encode_token(user_id=person_uid, token_type="access_token")
+        refresh_token = SuperUser.encode_token(user_id=person_uid, token_type="refresh_token")
+        
         resp["message"] = "User {} found succesfully!!! Ready for login".format(person_name)
         resp["userName"] = person_name
         resp["uid"] = person_uid
+        resp["access_token"] = access_token
+        resp["refresh_token"] = refresh_token
         return resp, 200
 
 
@@ -260,9 +266,14 @@ class RecognizeWithAudio(Resource):
         else:
             userAudioPath = userAudio.userAudioPath
         
+        access_token = SuperUser.encode_token(user_id=uid, token_type="access_token")
+        refresh_token = SuperUser.encode_token(user_id=uid, token_type="refresh_token")
+        
         resp["message"] = "successfully Detected USER for log in"
         resp["uid"] = uid
         resp["userAudioPath"] = userAudioPath
+        resp["access_token"] = access_token
+        resp["refresh_token"] = refresh_token
         return resp, 200
 
 
