@@ -14,6 +14,7 @@ from src.api.user.crud import (
 from src.api.utils import save_photo, save_audio, save_temp_audio, save_temp_photo
 from src.fr_module import face_recognition_module
 from src.speech_recognition_module import speaker_recognition_module
+from src.conversation_agent_module.conversation_agent_package.ConvAgent import ConvAgent
 
 
 user_namespace = Namespace('user')
@@ -302,6 +303,7 @@ class UploadImage(Resource):
         
 class FeedbackUser(Resource):
     def post(self):
+        """user will give feedback through this api"""
         resp = {}
         payload = request.get_json()
         uid = payload.get("uid")
@@ -314,8 +316,9 @@ class FeedbackUser(Resource):
         resp["message"] = "Thank you for your feedback"
         return resp, 200
 
-class UnknownQuestion(Resource):
+class StoreUnknownQuestion(Resource):
     def post(self):
+        """Unknown question will be stored in DB"""
         resp = {}
         payload = request.get_json()
         uid = payload.get("uid")
@@ -324,13 +327,32 @@ class UnknownQuestion(Resource):
         resp["message"] = "Saved your unknown questions"
         return resp, 200
 
+class RecognizeQuestion(Resource):
+    def post(self):
+        """with this API, a given question will be listed as known or unknown"""
+        payload = request.get_json()
+        uid = payload.get("uid")
+        question = payload.get("question")
+        conversational_agent_module = ConvAgent("multi-qa-distilbert-cos-v1")
+        conversation_data = conversational_agent_module.conversation(question=question)
+        # conversation_data = conversational_agent_module.conversation("ক্রেডিট ট্রান্সফার করতে চাই কি করতে হবে")
+        if conversation_data["success"] == False:
+            return conversation_data, 405
+        else:
+            if conversation_data["unknown"] == True: #don't need to store data
+                return conversation_data, 401
+            else:
+                return conversation_data, 200 ##user will get prompt
+
+
 user_namespace.add_resource(LoginSuperUser, "/loginAsSuperUser")
 user_namespace.add_resource(RegisterSuperUser, "/registerSuperUser")
 user_namespace.add_resource(RegisterNewUserBasic, "/registerNewUser")
-user_namespace.add_resource(UploadImage, "/upload_image")
+user_namespace.add_resource(UploadImage, "/uploadImage")
 user_namespace.add_resource(RegisterNewUserImage, "/registerNewUserImage")
 user_namespace.add_resource(RegisterNewUserAudio, "/registerNewUserAudio")
 user_namespace.add_resource(RecognizeWithAudio, "/recognizeWithAudio")
 user_namespace.add_resource(RecognizeWithImage,"/RecognizeWithImage")
 user_namespace.add_resource(FeedbackUser,"/userFeedback")
-user_namespace.add_resource(UnknownQuestion,"/userUnkownQuestions")
+user_namespace.add_resource(StoreUnknownQuestion,"/storeUnknownQuestion")
+user_namespace.add_resource(RecognizeQuestion, "/recognizeQuestion")
