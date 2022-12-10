@@ -50,6 +50,30 @@ class UserAudio(db.Model):
         self.userAudioPath = userAudioPath
         userAudioGMMPath = userAudioGMMPath
 
+
+class UserFeedbck(db.Model):
+    __tablename__ = "users_feedback"
+    
+    id = db.Column(db.Integer, nullable = False, primary_key = True, unique = True, autoincrement = True)
+    uid = db.Column(db.String(128), db.ForeignKey("users.uid"), nullable = True)
+    rating = db.Column(db.Integer, nullable = True)
+    comment = db.Column(db.Text, nullable = True)
+    feedback_time = db.Column(db.DateTime,default=func.now(), nullable=False)
+
+    def __init__(self, uid, rating, comment):
+        self.uid = uid
+        self.rating = rating
+        self.comment = comment
+
+class UserUnknownQuestions(db.Model):
+    __tablename__ = "users_unknown_questions"
+
+    id = db.Column(db.Integer, nullable = False, primary_key = True, unique = True, autoincrement = True)
+    uid = db.Column(db.String(128), db.ForeignKey("users.uid"), nullable = True)
+    unknown_question = db.Column(db.Text, nullable = False)
+    question_time = db.Column(db.DateTime,default=func.now(), nullable=False)
+
+
 class SuperUser(db.Model):
     __tablename__ = "super_users"
 
