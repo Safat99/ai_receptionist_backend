@@ -113,9 +113,9 @@ class ExportQuestions(Resource):
         return response
 
 
-admin_namespace.add_resource(New_Users, "/new_users")
-admin_namespace.add_resource(FeedbackUsers,"/users_feedback")
-admin_namespace.add_resource(FeedbackUser,"/users_feedback/<uid>")
-admin_namespace.add_resource(UnknownUserQuestions,"/unknown_questions")
-admin_namespace.add_resource(UnknownUserQuestion,"/unknown_questions/<uid>")
-admin_namespace.add_resource(ExportQuestions,"/export_unknown_questions")
+admin_namespace.add_resource(New_Users, "/newUsers")
+admin_namespace.add_resource(FeedbackUsers,"/usersFeedback")
+admin_namespace.add_resource(FeedbackUser,"/usersFeedback/<uid>")
+admin_namespace.add_resource(UnknownUserQuestions,"/unknownQuestions")
+admin_namespace.add_resource(UnknownUserQuestion,"/unknownQuestions/<uid>")
+admin_namespace.add_resource(ExportQuestions,"/exportUnknownQuestions")
