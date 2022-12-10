@@ -1,5 +1,5 @@
 from src import db
-from src.models import SuperUser, User, UserImage, UserAudio
+from src.models import SuperUser, User, UserImage, UserAudio, UserFeedback, UserUnknownQuestions
 
 def add_admin(**kwargs):
     """this api will be removed later"""
@@ -44,4 +44,22 @@ def add_userAudio(uid, userAudioPath,userAudioGMMPath):
         userAudioGMMPath = userAudioGMMPath
     )
     db.session.add(audio_obj)
+    db.session.commit()
+
+
+def save_feedback(uid, rating, comment):
+    feedback = UserFeedback(
+        uid = uid,
+        rating = rating,
+        comment = comment
+    )
+    db.session.add(feedback)
+    db.session.commit()
+
+def save_unknown_question(uid, unknown_question):
+    question = UserUnknownQuestions(
+        uid= uid,
+        unknown_question = unknown_question
+    )
+    db.session.add(question)
     db.session.commit()

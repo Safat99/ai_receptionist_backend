@@ -51,7 +51,7 @@ class UserAudio(db.Model):
         userAudioGMMPath = userAudioGMMPath
 
 
-class UserFeedbck(db.Model):
+class UserFeedback(db.Model):
     __tablename__ = "users_feedback"
     
     id = db.Column(db.Integer, nullable = False, primary_key = True, unique = True, autoincrement = True)

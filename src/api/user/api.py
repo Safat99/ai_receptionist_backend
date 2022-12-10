@@ -7,7 +7,9 @@ from src.api.user.crud import (
     add_admin,
     add_user,
     add_userImage,
-    add_userAudio
+    add_userAudio,
+    save_feedback,
+    save_unknown_question
 )
 from src.api.utils import save_photo, save_audio, save_temp_audio, save_temp_photo
 from src.fr_module import face_recognition_module
@@ -298,6 +300,29 @@ class UploadImage(Resource):
         resp["mediatype"] = mediatype
         return resp, 200
         
+class FeedbackUser(Resource):
+    def post(self):
+        resp = {}
+        payload = request.get_json()
+        uid = payload.get("uid")
+        comment = payload.get("comment")
+        rating = payload.get("rating")
+        if rating<1 or rating >5:
+            resp["message"] = "user ratings have to be between 1-5"
+            return resp, 405
+        save_feedback(uid=uid, rating=rating, comment=comment)
+        resp["message"] = "Thank you for your feedback"
+        return resp, 200
+
+class UnknownQuestion(Resource):
+    def post(self):
+        resp = {}
+        payload = request.get_json()
+        uid = payload.get("uid")
+        unknown_question = payload.get("unknown_question")
+        save_unknown_question(uid=uid, unknown_question=unknown_question)
+        resp["message"] = "Saved your unknown questions"
+        return resp, 200
 
 user_namespace.add_resource(LoginSuperUser, "/loginAsSuperUser")
 user_namespace.add_resource(RegisterSuperUser, "/registerSuperUser")
@@ -307,3 +332,5 @@ user_namespace.add_resource(RegisterNewUserImage, "/registerNewUserImage")
 user_namespace.add_resource(RegisterNewUserAudio, "/registerNewUserAudio")
 user_namespace.add_resource(RecognizeWithAudio, "/recognizeWithAudio")
 user_namespace.add_resource(RecognizeWithImage,"/RecognizeWithImage")
+user_namespace.add_resource(FeedbackUser,"/userFeedback")
+user_namespace.add_resource(UnknownQuestion,"/userUnkownQuestions")

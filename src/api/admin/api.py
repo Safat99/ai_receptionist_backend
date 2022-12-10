@@ -1,6 +1,6 @@
 from flask import request
 from flask_restx import Resource, Namespace, fields
-from src.models import User
+from src.models import User, UserFeedback, UserUnknownQuestions
 from src.api.admin.crud import (
     verify_user
 )
@@ -28,6 +28,25 @@ user_model = admin_namespace.model(
     },
 )
 
+user_questions = admin_namespace.model(
+    "show all unknown questions",
+    {
+        "uid" : fields.String(),
+        "unknown_question": fields.String(),
+        "question_time": fields.DateTime(),
+    }
+)
+
+feedback_users = admin_namespace.model(
+    "show all feedbacks of users",
+    {
+        "uid" : fields.String(),
+        "rating": fields.Integer,
+        "comment": fields.String(),
+        "feedback_time": fields.DateTime(),
+    }
+)
+
 class New_Users(Resource):
     @admin_namespace.marshal_with(user_model, as_list=True)
     @admin_namespace.doc(params={'Authorization': {"type": "Bearer", "in": "header"}})
@@ -51,5 +70,32 @@ class New_Users(Resource):
         resp['message'] = 'User verified successfully!' 
         return resp, 201
 
+class FeedbackUsers(Resource):
+    @admin_namespace.marshal_with(feedback_users,as_list=True)
+    def get(self):
+        """All feedbacks and comments"""
+        return UserFeedback.query.all(), 200
+
+class FeedbackQuestions(Resource):
+    @admin_namespace.marshal_with(user_questions,as_list=True)
+    def get(self):
+        """show all questions"""
+        return UserUnknownQuestions.query.all(), 200
+
+class FeedbackUser(Resource):
+    @admin_namespace.marshal_with(feedback_users,as_list=True)
+    def get(self,uid):
+        """All feedbacks and comments of single user"""
+        return UserFeedback.query.filter_by(uid=uid).all(), 200
+
+class FeedbackQuestion(Resource):
+    @admin_namespace.marshal_with(user_questions,as_list=True)
+    def get(self,uid):
+        """show all questions"""
+        return UserUnknownQuestions.query.filter_by(uid=uid).all(), 200
 
 admin_namespace.add_resource(New_Users, "/new_users")
+admin_namespace.add_resource(FeedbackUsers,"/users_feedback")
+admin_namespace.add_resource(FeedbackUser,"/users_feedback/<uid>")
+admin_namespace.add_resource(FeedbackQuestions,"/unknown_questions")
+admin_namespace.add_resource(FeedbackQuestion,"/unknown_questions/<uid>")
