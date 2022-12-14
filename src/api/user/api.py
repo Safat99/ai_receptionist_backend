@@ -230,7 +230,7 @@ class RegisterNewUserAudio(Resource):
         filename = save_audio(file=file)
         speaker_model_path = speaker_recognition_module.register_speaker('data/audios/'+ filename, user_id = userName)
         if speaker_model_path == -1:
-            resp["message"] = "speaker register operation failed"
+            resp["message"] = "speaker register operation failed!! data path not found"
             return resp, 405
         add_userAudio(uid=uid, userAudioPath='data/audios/'+filename, userAudioGMMPath=speaker_model_path)
         resp["message"] = "saved in .gmm and location in db succesfully"

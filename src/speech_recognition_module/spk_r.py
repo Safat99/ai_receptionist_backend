@@ -59,7 +59,7 @@ class Spk_r:
         
         # user ids of all the users in the database
         # user_ids = [int(fname.split("/")[-1].split(".gmm")[0]) for fname in gmm_files]
-        user_names = [int(fname.split("/")[-1].split(".gmm")[0]) for fname in gmm_files]
+        user_names = [fname.split("/")[-1].split(".gmm")[0] for fname in gmm_files]
 
         #list of existing models
         existing_speaker_models   = [pickle.load(open(gmm_file,'rb')) for gmm_file in gmm_files] # rb stands for  reading the binary file
