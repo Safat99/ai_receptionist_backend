@@ -54,7 +54,7 @@ class New_Users(Resource):
     @admin_namespace.doc(params={'Authorization': {"type": "Bearer", "in": "header"}})
     def get(self):
         """new user list"""
-        all_new_users = User.query.filter_by(isVerified=False).all()
+        all_new_users = User.query.filter_by(isVerified=True).all()
         return all_new_users, 200
     
     @admin_namespace.expect(new_user)

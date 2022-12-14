@@ -99,6 +99,7 @@ class FR:
         # calculating distances from current users encoding values to the existing users encoding values
         # minimum means similar face
         distances= face_recognition.face_distance(existing_encodings_list, current_encoding)
+        # print(distances) ##distance [] means no data ... we need to hit register api first..
         """
         if min(distances)<0.5:
             match_idx= np.argmin(distances) ## array index
@@ -114,7 +115,7 @@ class FR:
         """
         if min(distances)<0.5:
             match_idx= np.argmin(distances) ## array index
-            person = UserImage.query.filter_by(userImg_endoed_value=all_encodings[match_idx][0]).first()
+            person = UserImage.query.filter_by(userImg_encoded_value=all_encodings[match_idx][0]).first()
             if person != None:
                 person_uid = person.uid
                 person_name = User.query.filter_by(uid=person_uid).first().userName

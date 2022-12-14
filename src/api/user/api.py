@@ -175,6 +175,7 @@ class RecognizeWithImage(Resource):
         
         filename, mediatype = save_temp_photo(file=file, filename=file.filename)
         result = face_recognition_module.recognize_face(image_file_path="data/images/" + filename)
+        # print(result)
         if type(result) == int:
             resp["message"] = "cannot encode image, please capture again"
             return resp, 405
