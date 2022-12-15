@@ -28,6 +28,12 @@ def unique_user_id(role):
             uid = roles.get(role) + random_string(5)
     return uid
 
+def write_file(data, filename):
+    # Convert binary data to proper format and write it on Hard Disk
+    with open(filename, 'wb') as file:
+        file.write(data)
+
+
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -46,14 +52,25 @@ def save_audio(file):
 def save_temp_audio(file,filename):
     file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
     
+def write_temp_audio(file):
+    filename = 'data/images/temp_audio.wav'
+    write_file(data=file, filename=filename)
+    return filename
+    
+
+
 def save_temp_photo(file,filename):
+    """a photo will be saved"""
     if file and allowed_file(filename):
         file_extension = filename.rsplit('.', 1)[1]
         filename = 'test_temp_photo' + file_extension
         file.save(os.path.join(current_app.config.get("UPLOAD_FOLDER"), filename))
         mediatype = file_extension.lower()
         return filename, mediatype
-    
 
-
-
+def write_temp_photo(file):
+    """ A temp photo will be write and stored"""
+    if file:
+        filename = 'data/images/temp_photo.jpg'
+        write_file(data=file, filename=filename)
+        return filename

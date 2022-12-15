@@ -11,7 +11,7 @@ from src.api.user.crud import (
     save_feedback,
     save_unknown_question
 )
-from src.api.utils import save_photo, save_audio, save_temp_audio, save_temp_photo
+from src.api.utils import save_photo, save_audio, write_temp_audio, write_temp_photo
 from src.fr_module import face_recognition_module
 from src.speech_recognition_module import speaker_recognition_module
 from src.conversation_agent_module.conversation_agent_package.ConvAgent import ConvAgent
@@ -160,23 +160,58 @@ class RegisterNewUserImage(Resource):
         resp["message"] = "saved in json and db succesfully"
         return resp, 200
         
-class RecognizeWithImage(Resource):
-    def post(self):
-        """upload image for recognize"""
-        resp = {}
+# class RecognizeWithImage(Resource):
+#     def post(self):
+#         """upload image for recognize"""
+#         resp = {}
         
+#         if 'file' not in request.files:
+#             resp["message"] = "No file part"
+#             return resp, 405
+#         file = request.files['file']
+#         if file.filename == '':
+#             resp["message"] = "No selected file"
+#             return resp, 405
+        
+#         filename, mediatype = save_temp_photo(file=file, filename=file.filename)
+#         result = face_recognition_module.recognize_face(image_file_path="data/images/" + filename)
+#         # print(result)``
+#         if type(result) == int: 
+#             resp["message"] = "cannot encode image, please capture again"
+#             return resp, 405
+#         # elif type(result) == str:
+#         else: 
+#             if result[0] == 'U':
+#                 resp["message"] = "Unknown user"
+#                 return resp, 405
+#             else:
+#                 person_uid = result
+#                 person_name = User.query.filter_by(uid=person_uid).first().userName
+        
+#         access_token = SuperUser.encode_token(user_id=person_uid, token_type="access_token")
+#         refresh_token = SuperUser.encode_token(user_id=person_uid, token_type="refresh_token")
+        
+#         resp["message"] = "User {} found succesfully!!! Ready for login".format(person_name)
+#         resp["userName"] = person_name
+#         resp["uid"] = person_uid
+#         resp["access_token"] = access_token
+#         resp["refresh_token"] = refresh_token
+#         return resp, 200
+
+class RecognizeWithImage2(Resource):
+    def post(self):
+        """with this API base64 image will be stored as file"""
+        resp = {}
         if 'file' not in request.files:
+            flash('No file part')
             resp["message"] = "No file part"
             return resp, 405
-        file = request.files['file']
-        if file.filename == '':
-            resp["message"] = "No selected file"
-            return resp, 405
-        
-        filename, mediatype = save_temp_photo(file=file, filename=file.filename)
-        result = face_recognition_module.recognize_face(image_file_path="data/images/" + filename)
-        # print(result)
-        if type(result) == int:
+        file = request.files['file'].read() ##this will be the blob file
+        filename = write_temp_photo(file=file)
+        # mediatype = 'jpg'
+        result = face_recognition_module.recognize_face(image_file_path=filename)
+        # print(result)``
+        if type(result) == int: 
             resp["message"] = "cannot encode image, please capture again"
             return resp, 405
         # elif type(result) == str:
@@ -187,7 +222,7 @@ class RecognizeWithImage(Resource):
             else:
                 person_uid = result
                 person_name = User.query.filter_by(uid=person_uid).first().userName
-        
+
         access_token = SuperUser.encode_token(user_id=person_uid, token_type="access_token")
         refresh_token = SuperUser.encode_token(user_id=person_uid, token_type="refresh_token")
         
@@ -197,6 +232,7 @@ class RecognizeWithImage(Resource):
         resp["access_token"] = access_token
         resp["refresh_token"] = refresh_token
         return resp, 200
+        
 
 
 class RegisterNewUserAudio(Resource):
@@ -236,24 +272,63 @@ class RegisterNewUserAudio(Resource):
         resp["message"] = "saved in .gmm and location in db succesfully"
         return resp, 200
 
-class RecognizeWithAudio(Resource):
+# class RecognizeWithAudio(Resource):
+#     def post(self):
+#         """the audio login api"""
+#         resp = {}
+#         if 'file' not in request.files:
+#             resp["message"] = "No file part"
+#             return resp, 405
+#         file = request.files['file']
+#         if file.filename == '':
+#             resp["message"] = "No selected file"
+#             return resp, 405
+#         ## the model can only work with .wav file
+#         elif file.filename.rsplit('.',1)[1] != 'wav':
+#             resp["message"] = "only .wav files are allowed"
+#             return resp, 405
+#         save_temp_audio(file=file, filename='test_temp_audio.wav')
+#         ## manually searching from the audio files and recognize
+#         detected_user_name, score = speaker_recognition_module.recognize_speaker(audio_path='data/audios/test_temp_audio.wav')
+#         if detected_user_name == -1:
+#             resp["message"] = "fails to recognize any audios"
+#             return resp, 405
+#         user = User.query.filter_by(userName=detected_user_name).first()
+#         if user == None:
+#             resp["message"] = "audio detected but cannot find any relavant user in DB"
+#             return resp, 405
+#         else:
+#             uid = user.uid
+#         userAudio = UserAudio.query.filter_by(uid=uid).first()
+#         if userAudio == None:
+#             resp["message"] = "userAudio table data missing"
+#             return resp, 405
+#         else:
+#             userAudioPath = userAudio.userAudioPath
+        
+#         access_token = SuperUser.encode_token(user_id=uid, token_type="access_token")
+#         refresh_token = SuperUser.encode_token(user_id=uid, token_type="refresh_token")
+        
+#         resp["message"] = "successfully Detected USER for log in"
+#         resp["uid"] = uid
+#         resp["userAudioPath"] = userAudioPath
+#         resp["access_token"] = access_token
+#         resp["refresh_token"] = refresh_token
+#         return resp, 200
+
+class RecognizeWithAudio2(Resource):
     def post(self):
         """the audio login api"""
         resp = {}
         if 'file' not in request.files:
             resp["message"] = "No file part"
             return resp, 405
-        file = request.files['file']
-        if file.filename == '':
-            resp["message"] = "No selected file"
-            return resp, 405
-        ## the model can only work with .wav file
-        elif file.filename.rsplit('.',1)[1] != 'wav':
-            resp["message"] = "only .wav files are allowed"
-            return resp, 405
-        save_temp_audio(file=file, filename='test_temp_audio.wav')
+        file = request.files['file'].read()
+        # print(type(file))
+        # print(len(file))
+        filename = write_temp_audio(file=file)
         ## manually searching from the audio files and recognize
-        detected_user_name, score = speaker_recognition_module.recognize_speaker(audio_path='data/audios/test_temp_audio.wav')
+        detected_user_name, score = speaker_recognition_module.recognize_speaker(audio_path=filename)
         if detected_user_name == -1:
             resp["message"] = "fails to recognize any audios"
             return resp, 405
@@ -279,6 +354,7 @@ class RecognizeWithAudio(Resource):
         resp["access_token"] = access_token
         resp["refresh_token"] = refresh_token
         return resp, 200
+
 
 
 class UploadImage(Resource):
@@ -352,8 +428,8 @@ user_namespace.add_resource(RegisterNewUserBasic, "/registerNewUser")
 user_namespace.add_resource(UploadImage, "/uploadImage")
 user_namespace.add_resource(RegisterNewUserImage, "/registerNewUserImage")
 user_namespace.add_resource(RegisterNewUserAudio, "/registerNewUserAudio")
-user_namespace.add_resource(RecognizeWithAudio, "/recognizeWithAudio")
-user_namespace.add_resource(RecognizeWithImage,"/RecognizeWithImage")
+user_namespace.add_resource(RecognizeWithAudio2, "/recognizeWithAudio2")
+user_namespace.add_resource(RecognizeWithImage2,"/RecognizeWithImage2")
 user_namespace.add_resource(FeedbackUser,"/userFeedback")
 user_namespace.add_resource(StoreUnknownQuestion,"/storeUnknownQuestion")
 user_namespace.add_resource(RecognizeQuestion, "/recognizeQuestion")
