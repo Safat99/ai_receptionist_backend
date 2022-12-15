@@ -319,7 +319,7 @@ class RegisterNewUserAudio(Resource):
             return resp, 405
         file = request.files['file'].read()
 
-        filename = write_audio(file=file)
+        filename = write_audio(file=file, name=userName)
         speaker_model_path = speaker_recognition_module.register_speaker(filename, user_id = userName)
         if speaker_model_path == -1:
             resp["message"] = "speaker register operation failed!! data path not found"
