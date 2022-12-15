@@ -11,7 +11,7 @@ from src.api.user.crud import (
     save_feedback,
     save_unknown_question
 )
-from src.api.utils import save_photo, save_audio, write_temp_audio, write_temp_photo
+from src.api.utils import write_photo, write_audio, write_temp_audio, write_temp_photo
 from src.fr_module import face_recognition_module
 from src.speech_recognition_module import speaker_recognition_module
 from src.conversation_agent_module.conversation_agent_package.ConvAgent import ConvAgent
@@ -127,9 +127,42 @@ class RegisterNewUserBasic(Resource):
         resp["uid"] = str(uid)
         return resp, 201
 
+# class RegisterNewUserImage(Resource):
+#     def post(self):
+#         """add user image"""
+#         resp = {}
+#         uid = request.form['uid']
+#         try:
+#             users_image_obj = User.query.filter_by(uid=uid).first()
+#             userName = users_image_obj.userName
+#         except:
+#             users_image_obj = None
+#             resp["message"] = "no user found against this uid"
+#             return resp, 405
+        
+#         if 'file' not in request.files:
+#             flash('No file part')
+#             resp["message"] = "No file part"
+#             return resp, 405
+#         file = request.files['file']
+#         # if user does not select file, browser also
+#         # submit a empty part without filename
+#         if file.filename == '':
+#             flash("No selected file")
+#             resp["message"] = "No selected file"
+#             return resp, 405
+#         filename, mediatype = save_photo(file)
+#         face_encoding = face_recognition_module.register_face(image_file_path=('data/images/' + filename), user_id=uid, name=userName)
+#         if type(face_encoding) != list:
+#             resp["message"] = "cannot encode image file properly!! returned with {}".format(face_encoding)
+#             return resp, 405
+#         add_userImage(uid=uid, filename=filename, mediatype=mediatype, face_encoding=str(face_encoding))
+#         resp["message"] = "saved in json and db succesfully"
+#         return resp, 200
+
 class RegisterNewUserImage(Resource):
     def post(self):
-        """add user image"""
+        """add user image blob file"""
         resp = {}
         uid = request.form['uid']
         try:
@@ -144,19 +177,15 @@ class RegisterNewUserImage(Resource):
             flash('No file part')
             resp["message"] = "No file part"
             return resp, 405
-        file = request.files['file']
+        file = request.files['file'].read()
         # if user does not select file, browser also
         # submit a empty part without filename
-        if file.filename == '':
-            flash("No selected file")
-            resp["message"] = "No selected file"
-            return resp, 405
-        filename, mediatype = save_photo(file)
-        face_encoding = face_recognition_module.register_face(image_file_path=('data/images/' + filename), user_id=uid, name=userName)
+        filename = write_photo(file=file, name=userName)
+        face_encoding = face_recognition_module.register_face(image_file_path=filename, user_id=uid, name=userName)
         if type(face_encoding) != list:
             resp["message"] = "cannot encode image file properly!! returned with {}".format(face_encoding)
             return resp, 405
-        add_userImage(uid=uid, filename=filename, mediatype=mediatype, face_encoding=str(face_encoding))
+        add_userImage(uid=uid, filename=filename, mediatype='jpg', face_encoding=str(face_encoding))
         resp["message"] = "saved in json and db succesfully"
         return resp, 200
         
@@ -235,9 +264,46 @@ class RecognizeWithImage2(Resource):
         
 
 
+# class RegisterNewUserAudio(Resource):
+#     def post(self):
+#         """upload audio for registration"""
+#         resp = {}
+#         uid = request.form['uid']
+#         try:
+#             users_image_obj = User.query.filter_by(uid=uid).first()
+#             userName = users_image_obj.userName
+#         except:
+#             users_image_obj = None
+#             resp["message"] = "no user found against this uid"
+#             return resp, 405
+        
+#         if 'file' not in request.files:
+#             resp["message"] = "No file part"
+#             return resp, 405
+#         file = request.files['file']
+#         # if user does not select file, browser also
+#         # submit a empty part without filename
+#         filename = file.filename
+#         if filename == '':
+#             resp["message"] = "No selected file"
+#             return resp, 405
+#         ## the model can only work with .wav file
+#         elif filename.rsplit('.',1)[1] != 'wav':
+#             resp["message"] = "only .wav files are allowed"
+#             return resp, 405
+
+#         filename = save_audio(file=file)
+#         speaker_model_path = speaker_recognition_module.register_speaker('data/audios/'+ filename, user_id = userName)
+#         if speaker_model_path == -1:
+#             resp["message"] = "speaker register operation failed!! data path not found"
+#             return resp, 405
+#         add_userAudio(uid=uid, userAudioPath='data/audios/'+filename, userAudioGMMPath=speaker_model_path)
+#         resp["message"] = "saved in .gmm and location in db succesfully"
+#         return resp, 200
+
 class RegisterNewUserAudio(Resource):
     def post(self):
-        """upload audio for registration"""
+        """upload audio for registration with blob"""
         resp = {}
         uid = request.form['uid']
         try:
@@ -251,24 +317,14 @@ class RegisterNewUserAudio(Resource):
         if 'file' not in request.files:
             resp["message"] = "No file part"
             return resp, 405
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        filename = file.filename
-        if filename == '':
-            resp["message"] = "No selected file"
-            return resp, 405
-        ## the model can only work with .wav file
-        elif filename.rsplit('.',1)[1] != 'wav':
-            resp["message"] = "only .wav files are allowed"
-            return resp, 405
+        file = request.files['file'].read()
 
-        filename = save_audio(file=file)
-        speaker_model_path = speaker_recognition_module.register_speaker('data/audios/'+ filename, user_id = userName)
+        filename = write_audio(file=file)
+        speaker_model_path = speaker_recognition_module.register_speaker(filename, user_id = userName)
         if speaker_model_path == -1:
             resp["message"] = "speaker register operation failed!! data path not found"
             return resp, 405
-        add_userAudio(uid=uid, userAudioPath='data/audios/'+filename, userAudioGMMPath=speaker_model_path)
+        add_userAudio(uid=uid, userAudioPath=filename, userAudioGMMPath=speaker_model_path)
         resp["message"] = "saved in .gmm and location in db succesfully"
         return resp, 200
 

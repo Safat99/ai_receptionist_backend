@@ -44,10 +44,23 @@ def save_photo(file):
         mediatype = filename.rsplit('.',1)[1].lower()
         return filename, mediatype
 
+def write_photo(file,name):
+    if file:
+        filename = 'data/images/{}.jpg'.format(name)
+        write_file(data=file, filename=filename)
+        return filename
+
+
 def save_audio(file):
     filename = file.filename
     file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
     return filename
+
+def write_audio(file,name):
+    if file:
+        filename = 'data/audios/{}.wav'.format(name)
+        write_file(data=file, filename=filename)
+        return filename
 
 def save_temp_audio(file,filename):
     file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
