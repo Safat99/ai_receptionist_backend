@@ -501,12 +501,12 @@ class SpeechToText(Resource):
         temp_audio = write_temp_audio(file=file)
         data = stt(temp_audio)
         if data["error"] == "":
-            resp["status"] = True
+            resp["success"] = True
             resp["error"] = ""
             resp["text"] = data["text"]
             return resp, 200
         else:
-            resp["status"] = False
+            resp["success"] = False
             resp["error"] = data["error"]
             resp["text"] = ""
             return resp, 404
