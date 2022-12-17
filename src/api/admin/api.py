@@ -94,6 +94,9 @@ class UnknownUserQuestion(Resource):
     @admin_namespace.marshal_with(user_questions,as_list=True)
     def get(self,uid):
         """show all questions"""
+        user = User.query.filter_by(uid=uid).first()
+        if user == None:
+            return {"message":"No User found with this uid:{}".format(uid)}, 404
         return UserUnknownQuestions.query.filter_by(uid=uid).all(), 200
 
 
