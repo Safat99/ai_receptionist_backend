@@ -11,7 +11,8 @@ from src.api.user.crud import (
     save_feedback,
     save_unknown_question
 )
-from src.api.utils import write_photo, write_audio, write_temp_audio, write_temp_photo
+from src.api.utils import write_photo, write_audio, write_temp_audio, write_temp_photo, save_photo
+from src.api.asr import stt
 from src.fr_module import face_recognition_module
 from src.speech_recognition_module import speaker_recognition_module
 from src.conversation_agent_module.conversation_agent_package.ConvAgent import ConvAgent
@@ -43,6 +44,15 @@ register_user = user_namespace.model(
         # "userAudioLocation": fields.String(required=True),
     },
 )
+
+coversation_agent = user_namespace.model(
+    "recognize question and give answer",
+    {
+        "uid": fields.String(required=True),
+        "questions":fields.String(required=True),
+    },
+)
+
 # upload_image = user_namespace.model(
 #     "upload image"
 #     {
@@ -176,7 +186,7 @@ class RegisterNewUserImage(Resource):
         if 'file' not in request.files:
             flash('No file part')
             resp["message"] = "No file part"
-            return resp, 405
+            return resp, 404
         file = request.files['file'].read()
         # if user does not select file, browser also
         # submit a empty part without filename
@@ -234,7 +244,7 @@ class RecognizeWithImage2(Resource):
         if 'file' not in request.files:
             flash('No file part')
             resp["message"] = "No file part"
-            return resp, 405
+            return resp, 404
         file = request.files['file'].read() ##this will be the blob file
         filename = write_temp_photo(file=file)
         # mediatype = 'jpg'
@@ -316,7 +326,7 @@ class RegisterNewUserAudio(Resource):
         
         if 'file' not in request.files:
             resp["message"] = "No file part"
-            return resp, 405
+            return resp, 404
         file = request.files['file'].read()
 
         filename = write_audio(file=file, name=userName)
@@ -378,7 +388,7 @@ class RecognizeWithAudio2(Resource):
         resp = {}
         if 'file' not in request.files:
             resp["message"] = "No file part"
-            return resp, 405
+            return resp, 404
         file = request.files['file'].read()
         # print(type(file))
         # print(len(file))
@@ -420,7 +430,7 @@ class UploadImage(Resource):
         if 'file' not in request.files:
             flash('No file part')
             resp["message"] = "No file part"
-            return resp, 405
+            return resp, 404
         file = request.files['file']
         # if user does not select file, browser also
         # submit a empty part without filename
@@ -461,6 +471,7 @@ class StoreUnknownQuestion(Resource):
         return resp, 200
 
 class RecognizeQuestion(Resource):
+    @user_namespace.expect(coversation_agent)
     def post(self):
         """with this API, a given question will be listed as known or unknown"""
         payload = request.get_json()
@@ -477,6 +488,29 @@ class RecognizeQuestion(Resource):
             else:
                 return conversation_data, 200 ##user will get prompt
 
+class SpeechToText(Resource):
+    def post(self):
+        """generate string from speech to text in bangla"""
+        resp = {}
+        if 'file' not in request.files:
+            resp["message"] = "No file part"
+            return resp, 404
+        file = request.files['file'].read()
+        # print(type(file))
+        # print(len(file))
+        temp_audio = write_temp_audio(file=file)
+        data = stt(temp_audio)
+        if data["error"] == "":
+            resp["status"] = True
+            resp["error"] = ""
+            resp["text"] = data["text"]
+            return resp, 200
+        else:
+            resp["status"] = False
+            resp["error"] = data["error"]
+            resp["text"] = ""
+            return resp, 404
+        
 
 user_namespace.add_resource(LoginSuperUser, "/loginAsSuperUser")
 user_namespace.add_resource(RegisterSuperUser, "/registerSuperUser")
@@ -489,3 +523,4 @@ user_namespace.add_resource(RecognizeWithImage2,"/RecognizeWithImage2")
 user_namespace.add_resource(FeedbackUser,"/userFeedback")
 user_namespace.add_resource(StoreUnknownQuestion,"/storeUnknownQuestion")
 user_namespace.add_resource(RecognizeQuestion, "/recognizeQuestion")
+user_namespace.add_resource(SpeechToText, "/speechToText")
