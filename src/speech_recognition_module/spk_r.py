@@ -19,7 +19,7 @@ class Spk_r:
             model_name = str(user_id)+".gmm"
 
             speaker_model_path = os.path.join(speaker_models_dir,model_name)#directory in which model is to saved
-             
+                
             # name of model represent's whose voice model
             gmm = GaussianMixture(n_components=16, covariance_type='diag', max_iter=500, n_init=3, verbose=1)
             gmm.fit(stacked_feature) #generating the GMM model of the stacked features
@@ -28,6 +28,7 @@ class Spk_r:
             pickle.dump(gmm, open(speaker_model_path, 'wb'))
         
         except Exception as e:
+            
             print("######################### Exception ####################")
             print(f"something went wrong while getting agent response: {e}.")
             print("###########################################")

@@ -16,6 +16,7 @@ from src.api.asr import stt
 from src.fr_module import face_recognition_module
 from src.speech_recognition_module import speaker_recognition_module
 from src.conversation_agent_module.conversation_agent_package.ConvAgent import ConvAgent
+import base64
 
 
 user_namespace = Namespace('user')
@@ -324,13 +325,19 @@ class RegisterNewUserAudio(Resource):
             resp["message"] = "no user found against this uid"
             return resp, 405
         
-        if 'file' not in request.files:
-            resp["message"] = "No file part"
-            return resp, 404
-        file = request.files['file'].read()
+        # if 'file' not in request.files:
+        #     resp["message"] = "No file part"
+        #     return resp, 404
+        # file = request.files['file'].read()
+        file = request.form['base64']
 
-        filename = write_audio(file=file, name=userName)
-        speaker_model_path = speaker_recognition_module.register_speaker(filename, user_id = userName)
+        wav_file = open('data/audios/{}.wav'.format(userName), "wb")
+        decode_string = base64.b64decode(file)
+        wav_file.write(decode_string)
+
+        filename = 'data/audios/{}.wav'.format(userName)
+        # filename = write_audio(file=file, name=userName)
+        speaker_model_path = speaker_recognition_module.register_speaker(audio_path = filename, user_id = userName)
         if speaker_model_path == -1:
             resp["message"] = "speaker register operation failed!! data path not found"
             return resp, 405
@@ -386,11 +393,12 @@ class RecognizeWithAudio2(Resource):
     def post(self):
         """the audio login api"""
         resp = {}
-        if 'file' not in request.files:
-            resp["message"] = "No file part"
-            return resp, 404
-        file = request.files['file'].read()
-        # print(type(file))
+        # if 'file' not in request.files:
+        #     resp["message"] = "No file part"
+        #     return resp, 404
+        # file = request.files['file'].read()
+        file = request.form['base64']
+        # print(type(file)) ##bytes file
         # print(len(file))
         filename = write_temp_audio(file=file)
         ## manually searching from the audio files and recognize
@@ -492,10 +500,11 @@ class SpeechToText(Resource):
     def post(self):
         """generate string from speech to text in bangla"""
         resp = {}
-        if 'file' not in request.files:
-            resp["message"] = "No file part"
-            return resp, 404
-        file = request.files['file'].read()
+        # if 'file' not in request.files:
+        #     resp["message"] = "No file part"
+        #     return resp, 404
+        # file = request.files['file'].read()
+        file = request.form['base64']
         # print(type(file))
         # print(len(file))
         temp_audio = write_temp_audio(file=file)

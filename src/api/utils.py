@@ -3,6 +3,7 @@ import string
 import random
 import os
 from flask import current_app
+import base64
 
 def random_string(digit):
     chars = string.ascii_lowercase + string.digits
@@ -31,7 +32,7 @@ def unique_user_id(role):
 def write_file(data, filename):
     # Convert binary data to proper format and write it on Hard Disk
     with open(filename, 'wb') as file:
-        file.write(data)
+        file.write(bytes(data, 'utf-8'))
 
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
@@ -66,8 +67,15 @@ def save_temp_audio(file,filename):
     file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
     
 def write_temp_audio(file):
-    filename = 'data/images/temp_audio.wav'
-    write_file(data=file, filename=filename)
+    ##prv version
+    # filename = 'data/audios/temp_audio.wav'
+    # write_file(data=file, filename=filename)
+    # return filename
+    ## base64..
+    filename = 'data/audios/temp_audio.wav'
+    wav_file = open(filename, "wb")
+    decode_string = base64.b64decode(file)
+    wav_file.write(decode_string)
     return filename
     
 
