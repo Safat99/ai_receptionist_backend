@@ -34,6 +34,12 @@ def write_file(data, filename):
     with open(filename, 'wb') as file:
         file.write(bytes(data, 'utf-8'))
 
+def write_file_image(data, filename):
+    # Convert binary data to proper format and write it on Hard Disk
+    with open(filename, 'wb') as file:
+        file.write(bytes(data))
+
+
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
@@ -48,7 +54,7 @@ def save_photo(file):
 def write_photo(file,name):
     if file:
         filename = 'data/images/{}.jpg'.format(name)
-        write_file(data=file, filename=filename)
+        write_file_image(data=file, filename=filename)
         return filename
 
 
@@ -93,5 +99,5 @@ def write_temp_photo(file):
     """ A temp photo will be write and stored"""
     if file:
         filename = 'data/images/temp_photo.jpg'
-        write_file(data=file, filename=filename)
+        write_file_image(data=file, filename=filename)
         return filename
