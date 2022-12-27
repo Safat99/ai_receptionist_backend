@@ -1,6 +1,10 @@
 venv/
 .flaskenv
+.env
+.dbenv
 src/__pycache__
 __pycache__
 src/api/__pycache__
 .vscode
+important_notes.txt
+data/
