@@ -11,12 +11,13 @@ from src.api.user.crud import (
     save_feedback,
     save_unknown_question
 )
-from src.api.utils import write_photo, write_audio, write_temp_audio, write_temp_photo, save_photo
+from src.api.utils import write_photo, write_audio, write_temp_audio, write_temp_photo, save_photo, save_temp_audio
 from src.api.asr import stt
 from src.fr_module import face_recognition_module
 from src.speech_recognition_module import speaker_recognition_module
 from src.conversation_agent_module.conversation_agent_package.ConvAgent import ConvAgent
 import base64
+import wave
 
 
 user_namespace = Namespace('user')
@@ -332,7 +333,7 @@ class RegisterNewUserAudio(Resource):
         file = request.form['base64']
 
         wav_file = open('data/audios/{}.wav'.format(userName), "wb")
-        decode_string = base64.b64decode(file)
+        decode_string = base64.urlsafe_b64decode(file)
         wav_file.write(decode_string)
 
         filename = 'data/audios/{}.wav'.format(userName)
@@ -345,49 +346,49 @@ class RegisterNewUserAudio(Resource):
         resp["message"] = "saved in .gmm and location in db succesfully"
         return resp, 200
 
-# class RecognizeWithAudio(Resource):
-#     def post(self):
-#         """the audio login api"""
-#         resp = {}
-#         if 'file' not in request.files:
-#             resp["message"] = "No file part"
-#             return resp, 405
-#         file = request.files['file']
-#         if file.filename == '':
-#             resp["message"] = "No selected file"
-#             return resp, 405
-#         ## the model can only work with .wav file
-#         elif file.filename.rsplit('.',1)[1] != 'wav':
-#             resp["message"] = "only .wav files are allowed"
-#             return resp, 405
-#         save_temp_audio(file=file, filename='test_temp_audio.wav')
-#         ## manually searching from the audio files and recognize
-#         detected_user_name, score = speaker_recognition_module.recognize_speaker(audio_path='data/audios/test_temp_audio.wav')
-#         if detected_user_name == -1:
-#             resp["message"] = "fails to recognize any audios"
-#             return resp, 405
-#         user = User.query.filter_by(userName=detected_user_name).first()
-#         if user == None:
-#             resp["message"] = "audio detected but cannot find any relavant user in DB"
-#             return resp, 405
-#         else:
-#             uid = user.uid
-#         userAudio = UserAudio.query.filter_by(uid=uid).first()
-#         if userAudio == None:
-#             resp["message"] = "userAudio table data missing"
-#             return resp, 405
-#         else:
-#             userAudioPath = userAudio.userAudioPath
+class RecognizeWithAudioWavFile(Resource):
+    def post(self):
+        """the audio login api"""
+        resp = {}
+        if 'file' not in request.files:
+            resp["message"] = "No file part"
+            return resp, 405
+        file = request.files['file']
+        if file.filename == '':
+            resp["message"] = "No selected file"
+            return resp, 405
+        ## the model can only work with .wav file
+        elif file.filename.rsplit('.',1)[1] != 'wav':
+            resp["message"] = "only .wav files are allowed"
+            return resp, 405
+        save_temp_audio(file=file, filename='test_temp_audio.wav')
+        ## manually searching from the audio files and recognize
+        detected_user_name, score = speaker_recognition_module.recognize_speaker(audio_path='data/audios/test_temp_audio.wav')
+        if detected_user_name == -1:
+            resp["message"] = "fails to recognize any audios"
+            return resp, 405
+        user = User.query.filter_by(userName=detected_user_name).first()
+        if user == None:
+            resp["message"] = "audio detected but cannot find any relavant user in DB"
+            return resp, 405
+        else:
+            uid = user.uid
+        userAudio = UserAudio.query.filter_by(uid=uid).first()
+        if userAudio == None:
+            resp["message"] = "userAudio table data missing"
+            return resp, 405
+        else:
+            userAudioPath = userAudio.userAudioPath
         
-#         access_token = SuperUser.encode_token(user_id=uid, token_type="access_token")
-#         refresh_token = SuperUser.encode_token(user_id=uid, token_type="refresh_token")
+        access_token = SuperUser.encode_token(user_id=uid, token_type="access_token")
+        refresh_token = SuperUser.encode_token(user_id=uid, token_type="refresh_token")
         
-#         resp["message"] = "successfully Detected USER for log in"
-#         resp["uid"] = uid
-#         resp["userAudioPath"] = userAudioPath
-#         resp["access_token"] = access_token
-#         resp["refresh_token"] = refresh_token
-#         return resp, 200
+        resp["message"] = "successfully Detected USER for log in"
+        resp["uid"] = uid
+        resp["userAudioPath"] = userAudioPath
+        resp["access_token"] = access_token
+        resp["refresh_token"] = refresh_token
+        return resp, 200
 
 class RecognizeWithAudio2(Resource):
     def post(self):
@@ -519,7 +520,42 @@ class SpeechToText(Resource):
             resp["error"] = data["error"]
             resp["text"] = ""
             return resp, 404
-        
+
+class GenerateAudioFromBlob(Resource):
+    def post(self):
+        """generate audio wave file from blob object"""
+        resp = {}
+        audio_data = request.data
+        print("type of audio data: ", type(audio_data))
+        # decoded_data = base64.b64decode(audio_data)
+
+        # wav_File = wave.open("data/audios/audio.wav", "wb")
+        # wav_File.setparams((1,2,44100,0, 'NONE', 'not compressed'))
+        # wav_File.writeframes(decoded_data)
+        # wav_File.close()
+
+        wav_file = open("data/audios/audio.wav", "wb")
+        decode_string = base64.urlsafe_b64decode(audio_data)
+        wav_file.write(decode_string)
+
+        # with open('data/audios/audio.webm', 'wb') as f:
+        #     f.write(audio_data)
+    
+        resp["message"] = "audio file generated succesfully"
+        return resp, 200
+
+class TestRequestDotData(Resource):
+    def post(self):
+        resp = {}
+        # payload = request.get_json()
+        # recv = payload.get("data")
+        recv = request.data
+        print(recv)
+        print(type(recv))
+        print()
+        print()
+        resp['recv'] = recv.decode('utf-8')
+        return resp, 200
 
 user_namespace.add_resource(LoginSuperUser, "/loginAsSuperUser")
 user_namespace.add_resource(RegisterSuperUser, "/registerSuperUser")
@@ -527,9 +563,12 @@ user_namespace.add_resource(RegisterNewUserBasic, "/registerNewUser")
 user_namespace.add_resource(UploadImage, "/uploadImage")
 user_namespace.add_resource(RegisterNewUserImage, "/registerNewUserImage")
 user_namespace.add_resource(RegisterNewUserAudio, "/registerNewUserAudio")
-user_namespace.add_resource(RecognizeWithAudio2, "/recognizeWithAudio2")
+user_namespace.add_resource(RecognizeWithAudio2, "/recognizeWithAudioBase64Form")
+user_namespace.add_resource(RecognizeWithAudioWavFile, "/recognizeWithAudioWavFile")
 user_namespace.add_resource(RecognizeWithImage2,"/RecognizeWithImage2")
 user_namespace.add_resource(FeedbackUser,"/userFeedback")
 user_namespace.add_resource(StoreUnknownQuestion,"/storeUnknownQuestion")
 user_namespace.add_resource(RecognizeQuestion, "/recognizeQuestion")
 user_namespace.add_resource(SpeechToText, "/speechToText")
+user_namespace.add_resource(GenerateAudioFromBlob, "/generateAudioFromBlob")
+user_namespace.add_resource(TestRequestDotData, "/testRequestDotData")
