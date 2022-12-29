@@ -63,29 +63,6 @@ def save_audio(file):
     file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
     return filename
 
-def write_audio(file,name):
-    if file:
-        filename = 'data/audios/{}.wav'.format(name)
-        write_file(data=file, filename=filename)
-        return filename
-
-def save_temp_audio(file,filename):
-    file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
-    
-def write_temp_audio(file):
-    ##prv version
-    # filename = 'data/audios/temp_audio.wav'
-    # write_file(data=file, filename=filename)
-    # return filename
-    ## base64..
-    filename = 'data/audios/temp_audio.wav'
-    wav_file = open(filename, "wb")
-    decode_string = base64.b64decode(file)
-    wav_file.write(decode_string)
-    return filename
-    
-
-
 def save_temp_photo(file,filename):
     """a photo will be saved"""
     if file and allowed_file(filename):
@@ -101,3 +78,26 @@ def write_temp_photo(file):
         filename = 'data/images/temp_photo.jpg'
         write_file_image(data=file, filename=filename)
         return filename
+
+###################### audio portion ############################################
+
+def write_audio(file,name):
+    if file:
+        filename = 'data/audios/{}.wav'.format(name)
+        write_file(data=file, filename=filename)
+        return filename
+
+def save_temp_audio(file,filename):
+    file.save(os.path.join(current_app.config.get("UPLOAD_AUDIO_FOLDER"), filename))
+    
+def write_temp_audio(file):
+    ##prv version
+    # filename = 'data/audios/temp_audio.wav'
+    # write_file(data=file, filename=filename)
+    # return filename
+    ## base64..
+    filename = 'data/audios/temp_base64_audio.wav'
+    wav_file = open(filename, "wb")
+    decode_string = base64.urlsafe_b64decode(file)
+    wav_file.write(decode_string)
+    return filename

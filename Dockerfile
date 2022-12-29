@@ -2,6 +2,10 @@ FROM python:3.8.10-slim-buster
 
 
 WORKDIR /home/safat
+RUN mkdir data\
+    && cd data\
+    && mkdir images face_data audios all_speaker_models\
+    && cd ..
 
 
 RUN yes| apt-get update \ 
@@ -30,4 +34,5 @@ ENV FLASK_APP manage.py
 
 COPY . .
 EXPOSE 5000
-CMD gunicorn -b 0.0.0.0:5000 manage:app
+CMD gunicorn -b 0.0.0.0:5000 --worker-class gevent manage:app
+# CMD gunicorn -b 0.0.0.0:5000 --worker-class gevent --log-level debug manage:app
