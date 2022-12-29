@@ -72,6 +72,26 @@ class New_Users(Resource):
         resp['message'] = 'User verified successfully!' 
         return resp, 201
 
+class ViewCatUsers(Resource):
+    def get(self,cat):
+        """view all specific users list"""
+        resp = {}
+        if cat == "all":
+            all_users = User.query.all()
+        elif cat == "faculty":
+            all_users = User.query.filter_by(role="faculty").all()
+        elif cat == "guest":
+            all_users = User.query.filter_by(role="guest").all()
+        elif cat == "student":
+            all_users = User.query.filer_by(role="student").all()
+        else:
+            resp["message"] = "invalid category given"
+            resp["all_users"] = []
+            return resp, 200
+        resp["message"] = "success"
+        resp["all_users"] = all_users
+        return resp, 200
+
 class FeedbackUsers(Resource):
     @admin_namespace.marshal_with(feedback_users,as_list=True)
     def get(self):
@@ -122,3 +142,4 @@ admin_namespace.add_resource(FeedbackUser,"/usersFeedback/<uid>")
 admin_namespace.add_resource(UnknownUserQuestions,"/unknownQuestions")
 admin_namespace.add_resource(UnknownUserQuestion,"/unknownQuestions/<uid>")
 admin_namespace.add_resource(ExportQuestions,"/exportUnknownQuestions")
+admin_namespace.add_resource(ViewCatUsers,"/viewUsers/<cat>")
