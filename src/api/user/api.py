@@ -394,11 +394,9 @@ class RecognizeWithAudio2(Resource):
     def post(self):
         """the audio login api"""
         resp = {}
-        # if 'file' not in request.files:
-        #     resp["message"] = "No file part"
-        #     return resp, 404
-        # file = request.files['file'].read()
+        
         file = request.form['base64']
+        # file = request.data  ## if we want to use raw data
         # print(type(file)) ##bytes file
         # print(len(file))
         filename = write_temp_audio(file=file)

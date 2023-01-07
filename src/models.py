@@ -73,6 +73,10 @@ class UserUnknownQuestions(db.Model):
     unknown_question = db.Column(db.Text, nullable = False)
     question_time = db.Column(db.DateTime,default=func.now(), nullable=False)
 
+    def __init__(self, uid, unknown_question):
+        self.uid = uid
+        self.unknown_question = unknown_question
+
 
 class SuperUser(db.Model):
     __tablename__ = "super_users"
@@ -87,6 +91,7 @@ class SuperUser(db.Model):
         self.email = email
         self.name = name
         self.password = bcrypt.generate_password_hash(password, current_app.config.get("BCRYPT_LOG_ROUNDS")).decode()
+    
     @staticmethod
     def encode_token(user_id, token_type):
         if token_type == "access_token":
@@ -99,6 +104,7 @@ class SuperUser(db.Model):
             "sub": user_id
         }
         return jwt.encode(payload, key=current_app.config.get("SECRET_KEY"), algorithm="HS256")
+    
     @staticmethod
     def decode_token(token):
         try:
